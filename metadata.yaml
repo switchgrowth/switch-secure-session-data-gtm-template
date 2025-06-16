@@ -16,6 +16,15 @@ homepage: "https://www.switchgrowth.com"
 documentation: "https://docs.switchgrowth.com/boost"
 versions:
   # Latest version
+  - sha: 51ed7fde829eff525b7a0948165f04de2be9d29f
+    changeNotes: Adding the to use CSS selectors + the ability to split values from CSS selectors on specific delimiters.
+
+  # Older versions
   - sha: f36006e355a6d509adbbb9c2f87f752ae131ddd4
     changeNotes: Initial Version
+
+
+
+
+
 
