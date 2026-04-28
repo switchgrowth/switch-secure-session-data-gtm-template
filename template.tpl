@@ -97,7 +97,7 @@ ___TEMPLATE_PARAMETERS___
                 },
                 {
                   "value": "customer_phone",
-                  "displayValue": "Phone Number (Always Hashed)"
+                  "displayValue": "Phone Number"
                 },
                 {
                   "value": "customer_first_name",
@@ -247,7 +247,7 @@ ___TEMPLATE_PARAMETERS___
                 },
                 {
                   "value": "customer_phone",
-                  "displayValue": "Phone Number (Always Hashed)"
+                  "displayValue": "Phone Number"
                 },
                 {
                   "value": "customer_first_name",
