@@ -97,7 +97,7 @@ ___TEMPLATE_PARAMETERS___
                 },
                 {
                   "value": "customer_phone",
-                  "displayValue": "Phone Number"
+                  "displayValue": "Phone Number (Always Hashed)"
                 },
                 {
                   "value": "customer_first_name",
@@ -247,7 +247,7 @@ ___TEMPLATE_PARAMETERS___
                 },
                 {
                   "value": "customer_phone",
-                  "displayValue": "Phone Number"
+                  "displayValue": "Phone Number (Always Hashed)"
                 },
                 {
                   "value": "customer_first_name",
@@ -389,10 +389,11 @@ ___SANDBOXED_JS_FOR_WEB_TEMPLATE___
 // Requires
 const log = require('logToConsole');
 const callInWindow = require('callInWindow');
+const copyFromWindow = require('copyFromWindow');
 const encodeUriComponent = require('encodeUriComponent');
 const JSON = require('JSON');
 const injectScript = require('injectScript');
-const copyFromDataLayer = require('copyFromDataLayer');
+const queryPermission = require('queryPermission');
 
 // Variables
 const cookieName = data.cookieName;
@@ -406,32 +407,35 @@ const pixelUrl = data.pixelUrl;
 const urlForPixel = pixelUrl ? pixelUrl : 'api.s10h.io';
 
 function init() {
-  const pixelAlreadyEmbedded = copyFromDataLayer('sg_pixel_loaded');
-  
   if (debugMode) {
     log('Session Data Tag Initialized');
   }
-  // Embed the Switch Pixel script into the page
-  
-  if (pixelAlreadyEmbedded) {
-    if (debugMode) {
-      log('Session Data - Pixel Already Present');
-    }
+
+  // We check window.__sgQueue (an array created by createQueue() in Switch
+  // Boost) instead of window.Switch directly. copyFromWindow returns a deep
+  // copy of the value, and it returns undefined for class instances with
+  // private fields like the real Switch — so checking 'Switch' would falsely
+  // report it missing once pixel.js has swapped the stub for the real
+  // instance. __sgQueue is a plain array, always serializable, and its
+  // presence proves Switch Boost has run on this page. callInWindow then
+  // dispatches Switch.setSecureCookieValues to either the stub (which queues
+  // it, drained when pixel.js loads) or the real instance (immediate).
+  if (copyFromWindow('__sgQueue')) {
+    if (debugMode) log('Switch contract present, setting cookie');
     setSecureCookie();
-  } else {
-    if (debugMode) {
-      log('Session Data - Pixel Not Present, Adding');
-    }
-    embedScripts(
-      (script) => {
-          setSecureCookie();
-        },
-      (script) => {
-        log("Switch Realtime unable to initialize / fire API call.");
-        data.gtmOnFailure();
-      }
-    );
+    return;
   }
+
+  // Switch Boost hasn't run yet on this page. Inject pixel.js ourselves as
+  // defense-in-depth, then set the cookie on success.
+  if (debugMode) log('Switch Boost not present, embedding pixel and setting cookie on load');
+  embedScripts(
+    function () { setSecureCookie(); },
+    function () {
+      log('Switch Session Data unable to initialize / set cookie.');
+      data.gtmOnFailure();
+    }
+  );
 }
 
 function setSecureCookie() {
@@ -441,24 +445,23 @@ function setSecureCookie() {
 
   // Process the arrays in order of priority (lowest to highest).
   // Later entries with the same fieldName will automatically overwrite earlier ones.
-  
+
   // Process Extras Fields (Lowest Priority)
-  extrasFields.forEach(function(item) {
+  extrasFields.forEach(function (item) {
     if (item && item.fieldName) {
       fieldMapObject[item.fieldName] = item;
     }
   });
 
   // 1. Process CSS Selector Values (Medium Priority)
-  cssSelectorValues.forEach(function(item) {
-    // Ensure the item and its fieldName property exist
+  cssSelectorValues.forEach(function (item) {
     if (item && item.fieldName) {
       fieldMapObject[item.fieldName] = item;
     }
   });
 
   // 2. Process Variable Values (Highest Priority)
-  variableValues.forEach(function(item) {
+  variableValues.forEach(function (item) {
     if (item && item.fieldName) {
       fieldMapObject[item.fieldName] = item;
     }
@@ -466,23 +469,18 @@ function setSecureCookie() {
 
   // Convert the de-duplicated object back into an array of its values.
   var payload = [];
+
   for (var key in fieldMapObject) {
-    // Ensure we only process own properties, not inherited ones
     if (fieldMapObject.hasOwnProperty(key)) {
       payload.push(fieldMapObject[key]);
     }
   }
 
-  // The original code included a filter for undefined items, which is good practice,
-  // although our current logic already prevents them.
-  payload = payload.filter(function(item) {
+  payload = payload.filter(function (item) {
     return item !== undefined;
   });
 
-  
   if (pixelId && payload.length) {
-    log(payload);
-
     if (debugMode) {
       log('Setting secure session data for cookie with a name of: ' + cookieName + ' with payload: ' + JSON.stringify(payload));
     }
@@ -506,21 +504,14 @@ function setSecureCookie() {
 */
 function embedScripts(onSuccess, onFail) {
   const cacheKey = "switch-" + pixelId;
-  const scriptsToEmbed = [];
-  scriptsToEmbed.push('https://' + urlForPixel +'/pixel.js?id='+ encodeUriComponent(pixelId));
-  
-  while(scriptsToEmbed.length) {
-    let script = scriptsToEmbed.pop();
-    injectScript(script,
-                 function() {},
-                 function() {},
-                 cacheKey
-                );
-  }
-  
-  if (scriptsToEmbed.length === 0) {
-    onSuccess();
+  const scriptUrl = 'https://' + urlForPixel + '/pixel.js?id=' + encodeUriComponent(pixelId) + '&sg_debug=' + (debugMode ? 1 : 0);
+
+  // Graceful fallback for custom domains
+  // Check if GTM has permission to inject this specific URL
+  if (queryPermission('inject_script', scriptUrl)) {
+    injectScript(scriptUrl, onSuccess, onFail, cacheKey);
   } else {
+    log('Switch Error: Permission denied for ' + scriptUrl + '. If using a custom domain, add it to the Template Permissions.');
     onFail();
   }
 }
@@ -587,45 +578,6 @@ ___WEB_PERMISSIONS___
                 "mapValue": [
                   {
                     "type": 1,
-                    "string": "Switch"
-                  },
-                  {
-                    "type": 8,
-                    "boolean": true
-                  },
-                  {
-                    "type": 8,
-                    "boolean": false
-                  },
-                  {
-                    "type": 8,
-                    "boolean": true
-                  }
-                ]
-              },
-              {
-                "type": 3,
-                "mapKey": [
-                  {
-                    "type": 1,
-                    "string": "key"
-                  },
-                  {
-                    "type": 1,
-                    "string": "read"
-                  },
-                  {
-                    "type": 1,
-                    "string": "write"
-                  },
-                  {
-                    "type": 1,
-                    "string": "execute"
-                  }
-                ],
-                "mapValue": [
-                  {
-                    "type": 1,
                     "string": "Switch.setSecureCookieValues"
                   },
                   {
@@ -666,44 +618,7 @@ ___WEB_PERMISSIONS___
             "listItem": [
               {
                 "type": 1,
-                "string": "https://api.s10h.io/*"
-              },
-              {
-                "type": 1,
-                "string": "https://switch-rails.127.0.0.1.nip.io/*"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    "clientAnnotations": {
-      "isEditedByUser": true
-    },
-    "isRequired": true
-  },
-  {
-    "instance": {
-      "key": {
-        "publicId": "read_data_layer",
-        "versionId": "1"
-      },
-      "param": [
-        {
-          "key": "allowedKeys",
-          "value": {
-            "type": 1,
-            "string": "specific"
-          }
-        },
-        {
-          "key": "keyPatterns",
-          "value": {
-            "type": 2,
-            "listItem": [
-              {
-                "type": 1,
-                "string": "sg_pixel_loaded"
+                "string": "https://*.s10h.io/*"
               }
             ]
           }
@@ -721,64 +636,81 @@ ___WEB_PERMISSIONS___
 ___TESTS___
 
 scenarios:
-- name: Doesn't run API call without required config fields (api key, pipeline ID,
-    payload with minimum required keys)
-  code: |-
-    const mockData = {
-      apiKey: "",
-      pipelineId: "",
-      pixelId:  "",
-      pixelUrl: "api.s10h.io",
-      debugMode: true
-    };
+- name: Sets cookie immediately when Switch contract present
+  code: |
+    let secureCookieCalled = false;
+    let injectCalled = false;
 
-    // Call runCode to run the template's code.
-    runCode(mockData);
+    mock('copyFromWindow', function (key) {
+      if (key === '__sgQueue') return [];
+      return undefined;
+    });
+    mock('callInWindow', function (path) {
+      if (path === 'Switch.setSecureCookieValues') secureCookieCalled = true;
+    });
+    mock('injectScript', function () { injectCalled = true; });
+    mock('queryPermission', function () { return true; });
 
-    // Verify that the tag finished successfully.
-    assertApi('gtmOnFailure').wasCalled();
-- name: Throws a failure if the pixelID is Missing
-  code: |-
-    const mockData = {
-      apiKey: "swg_12345",
-      pixelId:  "",
-      pixelUrl: "api.s10h.io",
-      debugMode: true
-    };
-
-    // Call runCode to run the template's code.
-    runCode(mockData);
-
-    // Verify that the tag finished successfully.
-    assertApi('gtmOnFailure').wasCalled();
-- name: Sets a cookie with the expected keys
-  code: |-
-    const copyFromDataLayer = require('copyFromDataLayer');
-    const mockData = {
-      apiKey: "swg_12345",
-      cookieName: "SwitchTempData",
-      expiresWithSession: false,
-      pixelId:  "12345",
-      pixelUrl: "api.s10h.io",
-      debugMode: true,
-      standardFields: [
-        {fieldName: 'email', fieldValue: 'session@data.com', hashValue: true}
-      ],
-      extraFields: [
-        {fieldName: 'sales_channel', fieldValue: 'website', hashValue: true}
-      ]
-    };
-
-    const payload = mockData.standardFields.concat(mockData.extrasFields).filter(function(item) {
-      return item !== undefined;
+    runCode({
+      cookieName: 'SwitchTempData',
+      pixelId: 'p',
+      variableFields: [{ fieldName: 'customer_email', fieldValue: 'abc', hashValue: true }]
     });
 
-    // Call runCode to run the template's code.
-    runCode(mockData);
-
-    // Verify that the tag finished successfully.
-    assertApi('callInWindow').wasCalled();
+    assertThat(secureCookieCalled).isTrue();
+    assertThat(injectCalled).isFalse();
     assertApi('gtmOnSuccess').wasCalled();
+- name: Embeds pixel and sets cookie when Switch Boost missing
+  code: |
+    let secureCookieCalled = false;
+    let injectedUrl = null;
+
+    mock('copyFromWindow', function () { return undefined; });
+    mock('callInWindow', function (path) {
+      if (path === 'Switch.setSecureCookieValues') secureCookieCalled = true;
+    });
+    mock('injectScript', function (url, onSuccess) {
+      injectedUrl = url;
+      onSuccess();
+    });
+    mock('queryPermission', function () { return true; });
+
+    runCode({
+      cookieName: 'SwitchTempData',
+      pixelId: 'p',
+      variableFields: [{ fieldName: 'customer_email', fieldValue: 'abc', hashValue: true }]
+    });
+
+    assertThat(injectedUrl).isDefined();
+    assertThat(secureCookieCalled).isTrue();
+    assertApi('gtmOnSuccess').wasCalled();
+- name: Fails fast on missing pixelId or empty payload
+  code: |
+    let secureCookieCalled = false;
+
+    mock('copyFromWindow', function (key) {
+      if (key === '__sgQueue') return [];
+      return undefined;
+    });
+    mock('callInWindow', function () { secureCookieCalled = true; });
+    mock('queryPermission', function () { return true; });
+
+    runCode({ cookieName: 'SwitchTempData' });  // missing pixelId + payload
+
+    assertThat(secureCookieCalled).isFalse();
+    assertApi('gtmOnFailure').wasCalled();
+- name: Fails gracefully if custom domain lacks permission
+  code: |-
+    mock('copyFromWindow', function () { return undefined; });   // force fallback path
+    mock('queryPermission', function () { return false; });      // force inject permission to fail
+
+    runCode({
+      pixelId: '123',
+      pixelUrl: 'unauthorized.com',
+      variableFields: [{ fieldName: 'customer_email', fieldValue: 'abc', hashValue: true }]
+    });
+
+    assertApi('gtmOnFailure').wasCalled();
 
 
 ___NOTES___
