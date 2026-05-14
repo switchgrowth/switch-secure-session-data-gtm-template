@@ -22,6 +22,9 @@ ___INFO___
   "description": "Provides the ability to temporarily store SHA256 hashed data in a secure session cookie.",
   "containerContexts": [
     "WEB"
+  ],
+  "categories": [
+    "SESSION_RECORDING"
   ]
 }
 
