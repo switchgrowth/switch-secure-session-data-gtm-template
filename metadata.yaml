@@ -16,6 +16,8 @@ homepage: "https://www.switchgrowth.com"
 documentation: "https://docs.switchgrowth.com/boost"
 versions:
   # Latest version
+  - sha: 76f10ed18edb3c210c8b716a03d4d439ab2a8c74
+    changeNotes: Updating to use new Switch Pixel Event Queue
   - sha: 51ed7fde829eff525b7a0948165f04de2be9d29f
     changeNotes: Adding the to use CSS selectors + the ability to split values from CSS selectors on specific delimiters.
 
