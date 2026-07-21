@@ -16,6 +16,8 @@ homepage: "https://www.switchgrowth.com"
 documentation: "https://docs.switchgrowth.com/boost"
 versions:
   # Latest version
+  - sha: d18ceb61b1f06d2fe6a36e079d5df77bbbb6228f
+    changeNotes: Add phone country setting for E.164 normalization
   - sha: 01fe4573101d3fee7bed84467f6bbf4a26facccb
     changeNotes: Add template category
   - sha: 76f10ed18edb3c210c8b716a03d4d439ab2a8c74
