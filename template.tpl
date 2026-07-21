@@ -61,6 +61,14 @@ ___TEMPLATE_PARAMETERS___
         "valueHint": "pixel.clientwebsite.com (no https or slashes needed)"
       },
       {
+        "type": "TEXT",
+        "name": "phoneCountry",
+        "displayName": "Phone Country (ISO 2-letter code)",
+        "simpleValueType": true,
+        "valueHint": "e.g. US, GB, AU, DE — defaults to US",
+        "help": "Default country used to normalize national-format phone numbers to E.164 before hashing them into the cookie (e.g. a GB number '0791...' becomes +44...). Numbers already in international format (starting with + or 00) are used as-is and ignore this. Covers North America, the UK, Australia, and Europe."
+      },
+      {
         "type": "CHECKBOX",
         "name": "expiresWithSession",
         "checkboxText": "Expire with Session",
@@ -407,6 +415,7 @@ const variableValues = data.variableFields || [];
 const extrasFields = data.extraFields || [];
 const pixelId = data.pixelId;
 const pixelUrl = data.pixelUrl;
+const phoneCountry = data.phoneCountry;
 const urlForPixel = pixelUrl ? pixelUrl : 'api.s10h.io';
 
 function init() {
@@ -489,7 +498,8 @@ function setSecureCookie() {
     }
 
     callInWindow('Switch.setSecureCookieValues', cookieName, payload, {
-      expiresWithSession: expiresWithSession
+      expiresWithSession: expiresWithSession,
+      phoneCountry: phoneCountry
     });
 
     data.gtmOnSuccess();
