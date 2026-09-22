@@ -155,7 +155,7 @@ ___TEMPLATE_PARAMETERS___
               "displayName": "CSS Selector",
               "simpleValueType": true,
               "enablingConditions": [],
-              "help": "This field takes a single CSS selector to query to retrieve the expected value. Check \u003ca href\u003d\"https://www.w3schools.com/cssref/css_selectors.php\"\u003ehere\u003c/a\u003e for more information about CSS selectors. \u003cstrong\u003eIf both the CSS Selector and Variable value are set for this field name, the variable value will be used unless empty\u003c/strong\u003e",
+              "help": "This field takes one or multiple comma separated CSS selectors to query to retrieve the expected value. Check \u003ca href\u003d\"https://www.w3schools.com/cssref/css_selectors.php\"\u003ehere\u003c/a\u003e for more information about CSS selectors. \u003cstrong\u003eIf both the CSS Selector and Variable value are set for this field name, the variable value will be used unless empty\u003c/strong\u003e",
               "valueHint": "e.g. input[name*\u003d\u0027email\u0027]"
             },
             "isUnique": false
@@ -354,7 +354,7 @@ ___TEMPLATE_PARAMETERS___
               "displayName": "Field CSS Selector",
               "simpleValueType": true,
               "valueHint": "e.g. input[name*\u003d\u0027email\u0027]",
-              "help": "This field takes a single CSS selector to query to retrieve the expected value. Check \u003ca href\u003d\"https://www.w3schools.com/cssref/css_selectors.php\"\u003ehere\u003c/a\u003e for more information about CSS selectors. \u003cstrong\u003eIf both the CSS Selector and Variable value are set, the variable value will be used unless empty\u003c/strong\u003e"
+              "help": "This field takes one or multiple comma separated CSS selectors to query to retrieve the expected value. Check \u003ca href\u003d\"https://www.w3schools.com/cssref/css_selectors.php\"\u003ehere\u003c/a\u003e for more information about CSS selectors. \u003cstrong\u003eIf both the CSS Selector and Variable value are set, the variable value will be used unless empty\u003c/strong\u003e"
             },
             "isUnique": false
           },
