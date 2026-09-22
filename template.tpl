@@ -65,7 +65,7 @@ ___TEMPLATE_PARAMETERS___
         "name": "expiresWithSession",
         "checkboxText": "Expire with Session",
         "simpleValueType": true,
-        "help": "By default the cookie will be set to expire in 2 days from creation to account for actions that may happen later. If you check this box, the cookie will be set to expire when the browser session ends, meaning if the user closes their browser and all it\u0027s tab, the cookie will no longer be present."
+        "help": "By default the cookie expires 7 days after it was last written, to cover actions that happen later. Checking this box shortens that to 5 minutes after the last write. Despite the name, it is not a browser-session cookie. Do not check it for a multi-step form: anyone who pauses for more than 5 minutes between steps loses everything they\u0027ve already entered."
       },
       {
         "type": "CHECKBOX",
@@ -494,7 +494,7 @@ function setSecureCookie() {
 
     data.gtmOnSuccess();
   } else {
-    log('Missing a needed value for realtime API call');
+    log('Switch Session Data: nothing stored. Set the Switch Pixel ID and at least one field value.');
     data.gtmOnFailure();
   }
 }
