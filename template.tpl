@@ -15,8 +15,8 @@ ___INFO___
   "securityGroups": [],
   "displayName": "Switch Session Data",
   "brand": {
-    "id": "brand_dummy",
-    "displayName": "",
+    "id": "switch_boost",
+    "displayName": "Switch Boost Activation Template",
     "thumbnail": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAACXCAYAAAD3XaJHAAAACXBIWXMAAAWJAAAFiQFtaJ36AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAARaSURBVHgB7d3LTRtRFIDhAw7seGTHAiyngyQVkDSQdJBHA0E0wKMCqABSAXRAssuSVIBlQGIVHC+RsHMuYSJAZjwOnplz7v0/yXIkZ8Hil8/4Hj9EAAAAAAAAAAAAAAAAAAAAAAAAEjIluKfZbH7RuzW9tfTW1tt+r9fb7SpBYYR1h0a1oXebQx467nQ6rwSFNQQ3lpaWWo1G4/CxhxcWFn6rH4JCpgU3Zmdnj0b8l1VBYYQl/0ZgK+//TE1NLQgKSz6sMAJl+HUVniD5sGZmZvYEE5d0WCsrKx91xK0KJi7ZsMII1Kg2BKVINiwdgZsy4oId/y/JsG5H4AdBaZILa1ExAsuXXFjz8/Mjz6zwdEmFdXtmtSYoXVJhFVjbYEKSCavI2gaTk0RYrG2ql0RYOgIPBJWKPqxwZqV3LwWVijos1jb1iTos1jb1iTYs1jb1ijIsRmD9ogxLXwWGj3C1BLWJLizWNjZEFxZrGxuiCou1jR3RhMXaxpZowmIE2hJFWLdf5NESmOE+LF4F2uQ+LNY2NrkOi7WNXW7DYm1jm9uwGIG2uQxreXl5lRFom8uwpqen+YYY49yFxdrGB1dhsbbxw1VYrG38cBMWaxtfXITFCPTHRVi3Z1aLAjfMh8XaxifTYbG28ct0WKxt/DIbFmsb38yGxdrGN5Nhsbbxz+oz1keBa1bDaglcsxpWW+Ca1bC+Clwz+5vQeuK+b+y4oat/z7EYMBgMfl5dXe1cXFy0xSjTPzYe1jl67PCu3+/XvifUqMLfYOm7TLvX19dvzs/PTcT+EL9iX1A4sNXIrb0frNvr9V50lRjDb0L7tjg3N/deDCIs53REt8QgwvLvRAwiLN9O9LrvuxhEWL5ttZUY9Ezgkp5lHZ2enpo9SOYZy6lGo/FZDCMsn8yOwAxh+XPS6XQ2xTjCckZfBb4VBwjLlx3rIzBDWH6EM6stcYKw/AgX7OaWzY8hLAd0H7ivF+yu3vxIWPadaFhuRmCGsOwzf2Y1DCsdw3Rtc2B5bZOHZyzDdG2zLk4Rll0uR2CGsGxysbbJQ1gGeVnb5CEse1yPwAxh2RLWNjsSAcIyRI8X1j2tbfIQlhFhbaNnVocSCcKyweXaJg9h2RDFBftdhFUzj+9cKIKw6tWNbQRmCKteu7GNwAxh1cf92iYPYdUkhrVNHsKqR3SvAh8irOpFPQIzhFWxfr9v+jsXJoWwKhTOrM7Ozr5JAgirOtGtbfIQVnWiv2C/i7AqEOvaJg9hle8ypRGYIazybac0AjOEVa5wZhXFW43HRVglin1tk4ewypPUq8CHCKscSaxt8hBWCXRt80kSR1iTt6drG5M/Q1Ilwpqs8IHTbQFhFTUYDEZ9kHSgt82UL9jv4hdWx9BsNn/p3fMhD4WowtomibfEFMEz1hj0WSuEMxjyUJsReB9hjSF8BF4Deh1+eUv+BnYZ/h0OQhmBAAAAAAAAAAAAAAAAAAAAAAAAACbrD87ZGJzFdja/AAAAAElFTkSuQmCC"
   },
   "description": "Provides the ability to temporarily store SHA256 hashed data in a secure session cookie.",
@@ -65,7 +65,7 @@ ___TEMPLATE_PARAMETERS___
         "name": "expiresWithSession",
         "checkboxText": "Expire with Session",
         "simpleValueType": true,
-        "help": "By default the cookie will be set to expire in 2 days from creation to account for actions that may happen later. If you check this box, the cookie will be set to expire when the browser session ends, meaning if the user closes their browser and all it\u0027s tab, the cookie will no longer be present."
+        "help": "By default the cookie expires 7 days after it was last written, to cover actions that happen later. Checking this box shortens that to 5 minutes after the last write. Despite the name, it is not a browser-session cookie. Do not check it for a multi-step form: anyone who pauses for more than 5 minutes between steps loses everything they\u0027ve already entered."
       },
       {
         "type": "CHECKBOX",
@@ -155,7 +155,7 @@ ___TEMPLATE_PARAMETERS___
               "displayName": "CSS Selector",
               "simpleValueType": true,
               "enablingConditions": [],
-              "help": "This field takes a single CSS selector to query to retrieve the expected value. Check \u003ca href\u003d\"https://www.w3schools.com/cssref/css_selectors.php\"\u003ehere\u003c/a\u003e for more information about CSS selectors. \u003cstrong\u003eIf both the CSS Selector and Variable value are set for this field name, the variable value will be used unless empty\u003c/strong\u003e",
+              "help": "This field takes one or multiple comma separated CSS selectors to query to retrieve the expected value. Check \u003ca href\u003d\"https://www.w3schools.com/cssref/css_selectors.php\"\u003ehere\u003c/a\u003e for more information about CSS selectors. \u003cstrong\u003eIf both the CSS Selector and Variable value are set for this field name, the variable value will be used unless empty\u003c/strong\u003e",
               "valueHint": "e.g. input[name*\u003d\u0027email\u0027]"
             },
             "isUnique": false
@@ -354,7 +354,7 @@ ___TEMPLATE_PARAMETERS___
               "displayName": "Field CSS Selector",
               "simpleValueType": true,
               "valueHint": "e.g. input[name*\u003d\u0027email\u0027]",
-              "help": "This field takes a single CSS selector to query to retrieve the expected value. Check \u003ca href\u003d\"https://www.w3schools.com/cssref/css_selectors.php\"\u003ehere\u003c/a\u003e for more information about CSS selectors. \u003cstrong\u003eIf both the CSS Selector and Variable value are set, the variable value will be used unless empty\u003c/strong\u003e"
+              "help": "This field takes one or multiple comma separated CSS selectors to query to retrieve the expected value. Check \u003ca href\u003d\"https://www.w3schools.com/cssref/css_selectors.php\"\u003ehere\u003c/a\u003e for more information about CSS selectors. \u003cstrong\u003eIf both the CSS Selector and Variable value are set, the variable value will be used unless empty\u003c/strong\u003e"
             },
             "isUnique": false
           },
@@ -494,7 +494,7 @@ function setSecureCookie() {
 
     data.gtmOnSuccess();
   } else {
-    log('Missing a needed value for realtime API call');
+    log('Switch Session Data: nothing stored. Set the Switch Pixel ID and at least one field value.');
     data.gtmOnFailure();
   }
 }
@@ -594,6 +594,45 @@ ___WEB_PERMISSIONS___
                   {
                     "type": 8,
                     "boolean": true
+                  }
+                ]
+              },
+              {
+                "type": 3,
+                "mapKey": [
+                  {
+                    "type": 1,
+                    "string": "key"
+                  },
+                  {
+                    "type": 1,
+                    "string": "read"
+                  },
+                  {
+                    "type": 1,
+                    "string": "write"
+                  },
+                  {
+                    "type": 1,
+                    "string": "execute"
+                  }
+                ],
+                "mapValue": [
+                  {
+                    "type": 1,
+                    "string": "__sgQueue"
+                  },
+                  {
+                    "type": 8,
+                    "boolean": true
+                  },
+                  {
+                    "type": 8,
+                    "boolean": false
+                  },
+                  {
+                    "type": 8,
+                    "boolean": false
                   }
                 ]
               }
